@@ -7,30 +7,37 @@ from kivy.uix.button import Button
 
 class MyApp(App):
 
-    grid = [['X', '', 'X', '', 'X', '', 'X', ''],
-            ['', 'X', '', 'X', '', 'X', '', 'X'],
-            ['X', '', 'X', '', 'X', '', 'X', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', 'O', '', 'O', '', 'O', '', 'O'],
-            ['O', '', 'O', '', 'O', '', 'O', ''],
-            ['', 'O', '', 'O', '', 'O', '', 'O']]
-    layout = GridLayout(cols=8, rows=8)
+    grid = [['', 'b', '', 'b', '', 'b', '', 'b', '', 'b'],
+            ['b', '', 'b', '', 'b', '', 'b', '', 'b', ''],
+            ['', 'b', '', 'b', '', 'b', '', 'b', '', 'b'],
+            ['b', '', 'b', '', 'b', '', 'b', '', 'b', ''],
+            ['', '', '', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', '', ''],
+            ['', 'w', '', 'w', '', 'w', '', 'w', '', 'w'],
+            ['w', '', 'w', '', 'w', '', 'w', '', 'w', ''],
+            ['', 'w', '', 'w', '', 'w', '', 'w', '', 'w'],
+            ['w', '', 'w', '', 'w', '', 'w', '', 'w', '']]
+    layout = GridLayout(cols=10, rows=10)
+    clicked = False
     def build(self):
         color = 0
         counter = 0
-        for row in self.grid:
+        for rowIndex, row in enumerate(self.grid):
             counter += 1
-            for pawn in row:
+            for columnIndex, pawn in enumerate(row):
                 if counter % 2 != 0:
                     color = (0.0, 0.0, 0.0, 0.0)
                 else:
-                    color = (2.0, 2.0, 2.0, 1.0)
-                self.layout.add_widget(Button(text=pawn, background_color=color))
+                    color = (3.0, 3.0, 3.0, 1.0)
+                text = str(columnIndex) + '-' + str(rowIndex)
+                self.layout.add_widget(Button(text=text, background_color=color, on_press=self.movePawn))
                 counter += 1
         return self.layout
 
-    def updateGrid(self):
+    def movePawn(self, button):
+        self.clicked = not self.clicked
+        if self.clicked == True:
+            print('test')
         return self.layout
 
 
