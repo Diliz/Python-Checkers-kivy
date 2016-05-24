@@ -10,6 +10,7 @@ class Checker(App):
     victory = False
     multiple = False
     prevPawn = ''
+    prevColor = ''
     turn = 'w'
     grid = [['', 'b', '', 'b', '', 'b', '', 'b', '', 'b'],
             ['b', '', 'b', '', 'b', '', 'b', '', 'b', ''],
@@ -39,7 +40,7 @@ class Checker(App):
                 placement = str(rowIndex) + str(columnIndex)
                 newPawn = copy.deepcopy(onePawn)
                 newPawn.color = pawn
-                newPawn.button = Button(id=placement, background_color=color, on_press=self.movePawn, text=pawn)
+                newPawn.button = Button(id=placement, background_color=color, on_press=self.movePawn, text=pawn, font_size=20)
                 newPawn.row = rowIndex
                 newPawn.column = columnIndex
                 self.grid[rowIndex][columnIndex] = newPawn
@@ -54,9 +55,12 @@ class Checker(App):
         if self.victory != True:
             if self.clicked == True or self.multiple == True:
                 if row == self.prevPawn.row and column == self.prevPawn.column:
-                    if self.multiple:
+                    if self.multiple == True:
                         self.multiple = False
                         self.changeTurn()
+                        print('Fin du tour')
+                    else:
+                        print('Mouvement annulé')
                     self.reinitPrev()
                     self.clicked = False
                 else:
@@ -65,6 +69,8 @@ class Checker(App):
             else:
                 if pawn.color == self.turn or pawn.color == self.turn + 'd':
                     self.prevPawn = pawn
+                    self.prevColor = pawn.button.background_color
+                    pawn.button.background_color = (0, 0.7, 0, 2)
                     self.clicked = True
         return False
 
@@ -97,9 +103,15 @@ class Checker(App):
                     self.multiple = self.checkForMultiple(self.grid[row][column])
                     if not self.multiple:
                         self.changeTurn()
+                        self.reinitPrev()
+                        print('Fin du tour')
                         self.clicked = False
                     else:
+                        print('test')
+                        self.reinitPrev()
                         self.prevPawn = self.grid[row][column]
+                        self.prevColor = self.prevPawn.button.background_color
+                        self.prevPawn.button.background_color = (0, 0.7, 0, 2)
                 else:
                     return False
             elif rowDiff == 1 or rowDiff == -1:
@@ -108,6 +120,8 @@ class Checker(App):
                         self.grid[row][column].button.text, self.prevPawn.button.text = self.prevPawn.button.text, self.grid[row][column].button.text
                         self.grid[row][column].color, self.prevPawn.color = self.prevPawn.color, self.grid[row][column].color
                         self.changeTurn()
+                        self.reinitPrev()
+                        print('Fin du tour')
                         self.clicked = False
                     else:
                         print('Mouvement arrière interdit')
@@ -147,6 +161,7 @@ class Checker(App):
         pawn.button.text = ''
 
     def reinitPrev(self):
+        self.grid[self.prevPawn.row][self.prevPawn.column].button.background_color = self.prevColor
         self.prevPawn = 0
 
     def changeTurn(self):
