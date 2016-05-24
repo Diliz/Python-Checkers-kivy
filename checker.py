@@ -107,7 +107,6 @@ class Checker(App):
                         print('Fin du tour')
                         self.clicked = False
                     else:
-                        print('test')
                         self.reinitPrev()
                         self.prevPawn = self.grid[row][column]
                         self.prevColor = self.prevPawn.button.background_color
