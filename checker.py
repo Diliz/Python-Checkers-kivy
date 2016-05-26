@@ -8,6 +8,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 
 class Checker(App):
+    dynamicValue = 10
     players = {}
     victory = False
     multiple = False
@@ -15,80 +16,52 @@ class Checker(App):
     prevColor = ''
     pawnEated = False
     turn = 'w'
-    grid = [['', 'b', '', 'b', '', 'b', '', 'b', '', 'b'],
-            ['b', '', 'b', '', 'b', '', 'b', '', 'b', ''],
-            ['', 'b', '', 'b', '', 'b', '', 'b', '', 'b'],
-            ['b', '', 'b', '', 'b', '', 'b', '', 'b', ''],
-            ['', '', '', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', '', '', ''],
-            ['', 'w', '', 'w', '', 'w', '', 'w', '', 'w'],
-            ['w', '', 'w', '', 'w', '', 'w', '', 'w', ''],
-            ['', 'w', '', 'w', '', 'w', '', 'w', '', 'w'],
-            ['w', '', 'w', '', 'w', '', 'w', '', 'w', '']]
-    dynamicGrid = []
-    layout = GridLayout(cols=10, rows=10)
+    grid = []
+    layout = ''
     clicked = False
 
     def build(self):
-        self.players['b'] = Player('Noir', 'w', 20, 1)
-        self.players['w'] = Player('Blanc', 'b', 20, -1)
-        onePawn = Pawn()
+        self.dynamicValue = 6
+        gridValue = self.dynamicValue * self.dynamicValue
+        diviser = int(sqrt(gridValue))
+        self.layout = GridLayout(cols=self.dynamicValue, rows=self.dynamicValue)
+        nbPawns = int((self.dynamicValue / 2) * ((self.dynamicValue / 2) -1))
+        self.players['b'] = Player('Noir', 'w', nbPawns, 1)
+        self.players['w'] = Player('Blanc', 'b', nbPawns, -1)
         color = 0
         counter = 0
-        # essaie de génération dynamique d'une grille (bonus)
-        # gridValue = 100
-        # diviser = int(sqrt(gridValue))
-        # print(str(diviser))
-        # for i in range(0, gridValue):
-        #     try:
-        #         value = self.dynamicGrid[int(i / (diviser * (i % diviser)))]
-        #     except Exception as e:
-        #         self.dynamicGrid.append([])
-        #     buttonId = str(int(i / diviser)) + str(int(i % diviser))
-        #     newPawn = copy.deepcopy(onePawn)
-        #     if i % 2 == 0:
-        #         color = (0.75, 0.58, 0.36, 2.5)
-        #         pawn = 'b'
-        #     else:
-        #         color = (0.84, 0.70, 0.49, 2.5)
-        #         pawn = 'w'
-        #     newPawn.color = pawn
-        #     newPawn.button = Button(id = buttonId, background_color=color, on_press=self.movePawn, text=pawn, font_size=20)
-        #     newPawn.row = int(i / diviser)
-        #     newPawn.column = int(i % diviser)
-        #     print(newPawn)
-        #     try:
-        #         self.dynamicGrid[int(i / diviser)][int(i % diviser)] = newPawn
-        #     except Exception as e:
-        #         print(str(int(i / diviser)))
-        #         print(str(int(i % diviser)))
-        #         self.dynamicGrid[int(i / diviser)].append([])
-        #         self.dynamicGrid[int(i / diviser)][int(i % diviser)].append('')
-        #         self.dynamicGrid[int(i / diviser)][int(i % diviser)] = newPawn
-        #         print(self.grid[int(i / diviser)][int(i % diviser)])
-            # self.layout.add_widget(self.grid[int(i / diviser)][int(i % diviser)].button)
-
-        for rowIndex, row in enumerate(self.grid):
-            counter += 1
-            for columnIndex, pawn in enumerate(row):
-                if counter % 2 == 0:
-                    color = (0.75, 0.58, 0.36, 2.5)
-                else:
-                    color = (0.84, 0.70, 0.49, 2.5)
-                buttonId = str(rowIndex) + str(columnIndex)
-                newPawn = copy.deepcopy(onePawn)
-                newPawn.color = pawn
-                newPawn.button = Button(id = buttonId, background_color=color, on_press=self.movePawn, text=pawn, font_size=20)
-                newPawn.row = rowIndex
-                newPawn.column = columnIndex
-                self.grid[rowIndex][columnIndex] = newPawn
-                self.layout.add_widget(self.grid[rowIndex][columnIndex].button)
+        jumpLine = 0
+        for i in range(0, gridValue):
+            if jumpLine != int(i / diviser):
+                jumpLine += 1
                 counter += 1
+            try:
+                value = self.grid[int(i / (diviser * (i % diviser)))]
+            except Exception as e:
+                self.grid.append([])
+            buttonId = str(int(i / diviser)) + '-' + str(int(i % diviser))
+            pawn = ''
+            if counter % 2 != 0:
+                color = (0.75, 0.58, 0.36, 2.5)
+                if i < int(nbPawns * 2):
+                    pawn = 'b'
+                if i >= int(gridValue - (nbPawns * 2)):
+                    pawn = 'w'
+            else:
+                color = (0.84, 0.70, 0.49, 2.5)
+            y = int(i / diviser)
+            x = int(i % diviser)
+            self.grid[y].append([])
+            self.grid[y][x].append('')
+            self.grid[y][x] = Pawn(pawn, Button(id = buttonId, background_color=color, on_press=self.movePawn, text=pawn, font_size=int(200 / self.dynamicValue)), y, x, False)
+            self.layout.add_widget(self.grid[y][x].button)
+            counter += 1
         return self.layout
 
     def movePawn(self, button):
-        row = int(button.id[0])
-        column = int(button.id[1])
+        matching = button.id.split('-')
+        row = int(matching[0])
+        column = int(matching[1])
         pawn = self.grid[row][column]
         if self.clicked == True:
             if row == self.prevPawn.row and column == self.prevPawn.column and self.pawnEated == False:
@@ -136,14 +109,14 @@ class Checker(App):
         return False
 
     def checkForEatable(self, row, column):
-        if (row + 1) < 9 and (column + 1) < 9 and  self.grid[row + 1][column + 1].color == self.players[self.turn].ennemy:
-            if (row + 2) < 9 and (column + 2) < 9 and self.grid[row + 2][column + 2].color == '':
+        if (row + 1) < self.dynamicValue and (column + 1) < self.dynamicValue and  self.grid[row + 1][column + 1].color == self.players[self.turn].ennemy:
+            if (row + 2) < self.dynamicValue and (column + 2) < self.dynamicValue and self.grid[row + 2][column + 2].color == '':
                 return True
-        if (row - 1) >= 0 and (column + 1) < 9 and self.grid[row - 1][column + 1].color == self.players[self.turn].ennemy:
-            if (row - 2) >= 0 and (column + 2) < 9 and self.grid[row - 2][column + 2].color == '':
+        if (row - 1) >= 0 and (column + 1) < self.dynamicValue and self.grid[row - 1][column + 1].color == self.players[self.turn].ennemy:
+            if (row - 2) >= 0 and (column + 2) < self.dynamicValue and self.grid[row - 2][column + 2].color == '':
                 return True
-        if (row + 1) < 9 and (column - 1) >= 0 and self.grid[row + 1][column - 1].color == self.players[self.turn].ennemy:
-            if (row + 2) < 9 and (column - 2) >= 0 and self.grid[row + 2][column - 2].color == '':
+        if (row + 1) < self.dynamicValue and (column - 1) >= 0 and self.grid[row + 1][column - 1].color == self.players[self.turn].ennemy:
+            if (row + 2) < self.dynamicValue and (column - 2) >= 0 and self.grid[row + 2][column - 2].color == '':
                 return True
         if (row - 1) >= 0 and (column - 1) >= 0 and self.grid[row - 1][column - 1].color == self.players[self.turn].ennemy:
             if (row - 2) >= 0 and (column - 2) >= 0 and self.grid[row - 2][column - 2].color == '':
@@ -191,7 +164,12 @@ class Pawn(object):
     column = 0
     queen = False
 
-    def __init__(self):
+    def __init__(self, color, button, row, column, queen):
+        self.color = color
+        self.button = button
+        self.row = row
+        self.column = column
+        self.queen = queen
         return
 
 class Player(object):
